@@ -1,0 +1,26 @@
+{
+  "name": "@exponent/spawn-async",
+  "version": "1.0.0",
+  "description": "A Promise-based interface into processes created by child_process.spawn",
+  "main": "spawnAsync.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/650Industries/spawn-async.git"
+  },
+  "keywords": [
+    "spawn",
+    "child_process",
+    "async",
+    "promise",
+    "process"
+  ],
+  "author": "exponent.team@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/650Industries/spawn-async/issues"
+  },
+  "homepage": "https://github.com/650Industries/spawn-async#readme"
+}
