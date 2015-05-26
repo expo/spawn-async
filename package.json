@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/650Industries/spawn-async/issues"
   },
-  "homepage": "https://github.com/650Industries/spawn-async#readme"
+  "homepage": "https://github.com/650Industries/spawn-async#readme",
+  "dependencies": {
+    "win-spawn": "^2.0.0"
+  }
 }
