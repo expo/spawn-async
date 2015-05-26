@@ -1,8 +1,8 @@
-var child_process = require('child_process');
+var spawn = (process.platform === 'win32') ? require('win-spawn') : require('child_process').spawn;
 
 module.exports = function () {
   var args = Array.prototype.slice.call(arguments, 0);
-  var child = child_process.spawn.apply(child_process, args);
+  var child = spawn.apply(spawn, args);
   var p = new Promise(function (fulfill, reject) {
     child.on('close', function (code) {
       if (code) {
