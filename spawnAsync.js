@@ -1,17 +1,42 @@
-var spawn = (process.platform === 'win32') ? require('win-spawn') : require('child_process').spawn;
+'use strict';
 
-module.exports = function () {
-  var args = Array.prototype.slice.call(arguments, 0);
-  var child = spawn.apply(spawn, args);
-  var p = new Promise(function (fulfill, reject) {
-    child.on('close', function (code) {
+let spawn = (process.platform === 'win32') ?
+  require('win-spawn') :
+  require('child_process').spawn;
+
+module.exports = function spawnAsync() {
+  let args = Array.prototype.slice.call(arguments, 0);
+  let child;
+  let promise = new Promise((fulfill, reject) => {
+    child = spawn.apply(spawn, args);
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', data => {
+      stdout += data;
+    });
+    child.stderr.on('data', data => {
+      stderr += data;
+    });
+
+    child.on('exit', (code, signal) => {
+      let result = {
+        pid: child.pid,
+        output: [stdout, stderr],
+        stdout,
+        stderr,
+        status: code,
+        signal,
+      };
       if (code) {
-        reject(new Error("Process exited with non-zero code: " + code));
+        let error = new Error(`Process exited with non-zero code: ${code}`);
+        Object.assign(error, result);
+        reject(error);
       } else {
-        fulfill(0);
+        fulfill(result);
       }
     });
   });
-  p.child = child;
-  return p;
+  promise.child = child;
+  return promise;
 };
