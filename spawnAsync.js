@@ -20,6 +20,7 @@ module.exports = function spawnAsync() {
     });
 
     child.on('exit', (code, signal) => {
+      child.removeAllListeners();
       let result = {
         pid: child.pid,
         output: [stdout, stderr],
@@ -35,6 +36,16 @@ module.exports = function spawnAsync() {
       } else {
         fulfill(result);
       }
+    });
+
+    child.on('error', error => {
+      child.removeAllListeners();
+      error.pid = child.pid;
+      error.output = [stdout, stderr];
+      error.stdout = stdout;
+      error.stderr = stderr;
+      error.status = error.code;
+      reject(error);
     });
   });
   promise.child = child;
