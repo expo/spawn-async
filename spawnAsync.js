@@ -19,7 +19,7 @@ module.exports = function spawnAsync() {
       stderr += data;
     });
 
-    child.on('exit', (code, signal) => {
+    child.on('close', (code, signal) => {
       child.removeAllListeners();
       let result = {
         pid: child.pid,
