@@ -12,12 +12,17 @@ module.exports = function spawnAsync() {
     let stdout = '';
     let stderr = '';
 
-    child.stdout.on('data', data => {
-      stdout += data;
-    });
-    child.stderr.on('data', data => {
-      stderr += data;
-    });
+    if (child.stdout) {
+      child.stdout.on('data', data => {
+        stdout += data;
+      });
+    }
+
+    if (child.stderr) {
+      child.stderr.on('data', data => {
+        stderr += data;
+      });
+    }
 
     child.on('close', (code, signal) => {
       child.removeAllListeners();
