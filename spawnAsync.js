@@ -1,8 +1,6 @@
 'use strict';
 
-let spawn = (process.platform === 'win32') ?
-  require('win-spawn') :
-  require('child_process').spawn;
+let spawn = require('cross-spawn-async');
 
 module.exports = function spawnAsync() {
   let args = Array.prototype.slice.call(arguments, 0);

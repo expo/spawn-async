@@ -1,6 +1,6 @@
 {
   "name": "@exponent/spawn-async",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "A Promise-based interface into processes created by child_process.spawn",
   "main": "spawnAsync.js",
   "scripts": {
@@ -24,6 +24,6 @@
   },
   "homepage": "https://github.com/exponentjs/spawn-async#readme",
   "dependencies": {
-    "win-spawn": "^2.0.0"
+    "cross-spawn-async": "^2.1.9"
   }
 }
