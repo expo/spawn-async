@@ -1,6 +1,6 @@
 # spawn-async
 
-Node's `child_process.spawn` as an async function that returns a promise.
+A cross-platform version of Node's `child_process.spawn` as an async function that returns a promise.
 
 ## Usage:
 ```js
