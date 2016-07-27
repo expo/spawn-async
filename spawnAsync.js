@@ -2,8 +2,7 @@
 
 let spawn = require('cross-spawn');
 
-module.exports = function spawnAsync() {
-  let args = Array.prototype.slice.call(arguments, 0);
+module.exports = function spawnAsync(...args) {
   let child;
   let promise = new Promise((fulfill, reject) => {
     child = spawn.apply(spawn, args);
