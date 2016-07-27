@@ -20,7 +20,7 @@ describe('spawnAsync', () => {
       await spawnAsync('false');
     } catch (e) {
       didThrow = true;
-      expect(typeof result.pid).toBe('number');
+      expect(typeof e.pid).toBe('number');
       expect(e.status).toBe(1);
     }
     expect(didThrow).toBe(true);
