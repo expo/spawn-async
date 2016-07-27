@@ -1,4 +1,4 @@
-# spawn-async
+# spawn-async [![CircleCI](https://circleci.com/gh/exponentjs/spawn-async.svg?style=svg)](https://circleci.com/gh/exponentjs/spawn-async)
 
 A cross-platform version of Node's `child_process.spawn` as an async function that returns a promise.
 
