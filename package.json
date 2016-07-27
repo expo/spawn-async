@@ -4,7 +4,16 @@
   "description": "A Promise-based interface into processes created by child_process.spawn",
   "main": "spawnAsync.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
+  },
+  "jest": {
+    "automock": false
+  },
+  "babel": {
+    "presets": [
+      "es2015-node6",
+      "stage-3"
+    ]
   },
   "repository": {
     "type": "git",
@@ -25,5 +34,11 @@
   "homepage": "https://github.com/exponentjs/spawn-async#readme",
   "dependencies": {
     "cross-spawn": "^4.0.0"
+  },
+  "devDependencies": {
+    "babel-jest": "^14.0.0",
+    "babel-preset-es2015-node6": "^0.2.0",
+    "babel-preset-stage-3": "^6.11.0",
+    "jest": "^14.0.0"
   }
 }
