@@ -1,0 +1,8 @@
+machine:
+  node:
+    version: node
+
+dependencies:
+  pre:
+    - npm prune
+
