@@ -1,6 +1,6 @@
 'use strict';
 
-let spawn = require('cross-spawn-async');
+let spawn = require('cross-spawn');
 
 module.exports = function spawnAsync() {
   let args = Array.prototype.slice.call(arguments, 0);

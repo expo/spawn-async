@@ -17,13 +17,13 @@
     "promise",
     "process"
   ],
-  "author": "exponent.team@gmail.com",
+  "author": "support@getexponent.com",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/exponentjs/spawn-async/issues"
   },
   "homepage": "https://github.com/exponentjs/spawn-async#readme",
   "dependencies": {
-    "cross-spawn-async": "^2.1.9"
+    "cross-spawn": "^4.0.0"
   }
 }
