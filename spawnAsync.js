@@ -47,7 +47,7 @@ module.exports = function spawnAsync() {
       error.output = [stdout, stderr];
       error.stdout = stdout;
       error.stderr = stderr;
-      error.status = error.code;
+      error.status = null;
       reject(error);
     });
   });

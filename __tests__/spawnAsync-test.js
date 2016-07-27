@@ -22,6 +22,7 @@ describe('spawnAsync', () => {
       didThrow = true;
       expect(typeof e.pid).toBe('number');
       expect(e.status).toBe(1);
+      expect(e.signal).toBe(null);
     }
     expect(didThrow).toBe(true);
   });
@@ -33,7 +34,8 @@ describe('spawnAsync', () => {
     } catch (e) {
       didThrow = true;
       expect(e.pid).not.toBeDefined();
-      expect(e.status).toBe('ENOENT');
+      expect(e.code).toBe('ENOENT');
+      expect(e.status).toBe(null);
     }
     expect(didThrow).toBe(true);
   });
