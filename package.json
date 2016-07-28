@@ -1,6 +1,6 @@
 {
   "name": "@exponent/spawn-async",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "A Promise-based interface into processes created by child_process.spawn",
   "main": "build/spawnAsync.js",
   "files": "build",
