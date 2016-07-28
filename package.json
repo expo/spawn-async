@@ -3,7 +3,9 @@
   "version": "1.2.7",
   "description": "A Promise-based interface into processes created by child_process.spawn",
   "main": "build/spawnAsync.js",
-  "files": "build",
+  "files": [
+    "build"
+  ],
   "engines": {
     "node": ">=4"
   },
