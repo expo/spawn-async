@@ -2,16 +2,21 @@
   "name": "@exponent/spawn-async",
   "version": "1.2.5",
   "description": "A Promise-based interface into processes created by child_process.spawn",
-  "main": "spawnAsync.js",
+  "main": "build/spawnAsync.js",
+  "files": "build",
+  "engines": {
+    "node": ">=4"
+  },
   "scripts": {
-    "test": "jest"
+    "build": "babel -d build --ignore /__tests__/ src",
+    "test": "jest src"
   },
   "jest": {
     "automock": false
   },
   "babel": {
     "presets": [
-      "es2015-node6",
+      "es2015-node4",
       "stage-3"
     ]
   },
@@ -36,8 +41,9 @@
     "cross-spawn": "^4.0.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.11.4",
     "babel-jest": "^14.0.0",
-    "babel-preset-es2015-node6": "^0.2.0",
+    "babel-preset-es2015-node4": "^2.1.0",
     "babel-preset-stage-3": "^6.11.0",
     "jest": "^14.0.0"
   }
