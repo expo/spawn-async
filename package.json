@@ -13,13 +13,10 @@
     "build": "babel -d build --ignore /__tests__/ src",
     "test": "jest src"
   },
-  "jest": {
-    "automock": false
-  },
   "babel": {
     "presets": [
       "es2015-node4",
-      "stage-3"
+      "es2017"
     ]
   },
   "repository": {
@@ -40,13 +37,13 @@
   },
   "homepage": "https://github.com/exponentjs/spawn-async#readme",
   "dependencies": {
-    "cross-spawn": "^4.0.0"
+    "cross-spawn": "^4.0.2"
   },
   "devDependencies": {
-    "babel-cli": "^6.11.4",
-    "babel-jest": "^14.0.0",
+    "babel-cli": "^6.16.0",
+    "babel-jest": "^15.0.0",
     "babel-preset-es2015-node4": "^2.1.0",
-    "babel-preset-stage-3": "^6.11.0",
-    "jest": "^14.0.0"
+    "babel-preset-es2017": "^6.16.0",
+    "jest": "^15.1.1"
   }
 }
