@@ -6,21 +6,23 @@ A cross-platform version of Node's `child_process.spawn` as an async function th
 ```js
 import spawnAsync from '@exponent/spawn-async';
 
-let resultPromise = spawnAsync('echo', ['hello', 'world'], { stdio: 'inherit' });
-let spawnedChildProcess = resultPromise.child;
-try {
-  let {
-    pid,
-    output: [stdout, stderr],
-    stdout,
-    stderr,
-    status,
-    signal,
-  } = await resultPromise;
-} catch (e) {
-  console.error(e.stack);
-  // The error object also has the same properties as the result object
-}
+(async function () {
+    let resultPromise = spawnAsync('echo', ['hello', 'world'], { stdio: 'inherit' });
+    let spawnedChildProcess = resultPromise.child;
+    try {
+    let {
+        pid,
+        output: [stdout, stderr],
+        stdout,
+        stderr,
+        status,
+        signal,
+      } = await resultPromise;
+    } catch (e) {
+       console.error(e.stack);
+      // The error object also has the same properties as the result object
+    }
+})();
 ```
 
 ## API
