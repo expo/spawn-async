@@ -10,7 +10,7 @@ import spawnAsync from '@exponent/spawn-async';
     let resultPromise = spawnAsync('echo', ['hello', 'world'], { stdio: 'inherit' });
     let spawnedChildProcess = resultPromise.child;
     try {
-    let {
+      let {
         pid,
         output: [stdout, stderr],
         stdout,
