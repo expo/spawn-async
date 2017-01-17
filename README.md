@@ -1,4 +1,4 @@
-# spawn-async [![CircleCI](https://circleci.com/gh/exponentjs/spawn-async.svg?style=svg)](https://circleci.com/gh/exponentjs/spawn-async) [![Build Status](https://travis-ci.org/exponentjs/spawn-async.svg?branch=master)](https://travis-ci.org/exponentjs/spawn-async)
+# spawn-async [![CircleCI](https://circleci.com/gh/exponent/spawn-async.svg?style=svg)](https://circleci.com/gh/exponent/spawn-async) [![Build Status](https://travis-ci.org/exponent/spawn-async.svg?branch=master)](https://travis-ci.org/exponent/spawn-async)
 
 A cross-platform version of Node's `child_process.spawn` as an async function that returns a promise.
 
@@ -7,7 +7,7 @@ A cross-platform version of Node's `child_process.spawn` as an async function th
 import spawnAsync from '@exponent/spawn-async';
 
 (async function () {
-    let resultPromise = spawnAsync('echo', ['hello', 'world'], { stdio: 'inherit' });
+    let resultPromise = spawnAsync('echo', ['hello', 'world']);
     let spawnedChildProcess = resultPromise.child;
     try {
       let {
