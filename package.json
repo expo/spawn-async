@@ -1,5 +1,5 @@
 {
-  "name": "@exponent/spawn-async",
+  "name": "@expo/spawn-async",
   "version": "1.2.8",
   "description": "A Promise-based interface into processes created by child_process.spawn",
   "main": "build/spawnAsync.js",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/exponentjs/spawn-async.git"
+    "url": "git+https://github.com/expo/spawn-async.git"
   },
   "keywords": [
     "spawn",
@@ -30,12 +30,12 @@
     "promise",
     "process"
   ],
-  "author": "support@getexponent.com",
+  "author": "support@expo.io",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/exponentjs/spawn-async/issues"
+    "url": "https://github.com/expo/spawn-async/issues"
   },
-  "homepage": "https://github.com/exponentjs/spawn-async#readme",
+  "homepage": "https://github.com/expo/spawn-async#readme",
   "dependencies": {
     "cross-spawn": "^4.0.2"
   },

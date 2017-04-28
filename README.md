@@ -1,10 +1,10 @@
-# spawn-async [![CircleCI](https://circleci.com/gh/exponent/spawn-async.svg?style=svg)](https://circleci.com/gh/exponent/spawn-async) [![Build Status](https://travis-ci.org/exponent/spawn-async.svg?branch=master)](https://travis-ci.org/exponent/spawn-async)
+# spawn-async [![CircleCI](https://circleci.com/gh/expo/spawn-async.svg?style=svg)](https://circleci.com/gh/expo/spawn-async) [![Build Status](https://travis-ci.org/expo/spawn-async.svg?branch=master)](https://travis-ci.org/expo/spawn-async)
 
 A cross-platform version of Node's `child_process.spawn` as an async function that returns a promise.
 
 ## Usage:
 ```js
-import spawnAsync from '@exponent/spawn-async';
+import spawnAsync from '@expo/spawn-async';
 
 (async function () {
     let resultPromise = spawnAsync('echo', ['hello', 'world']);
