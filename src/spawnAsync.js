@@ -1,6 +1,6 @@
 'use strict';
 
-let spawn = require('cross-spawn');
+const spawn = require('cross-spawn');
 
 module.exports = function spawnAsync(...args) {
   let child;
