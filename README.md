@@ -48,14 +48,17 @@ You can do this by accessing `.child` on the Promise that is returned by `spawnA
 
 Here is an example:
 ```js
-let ffmpeg$ = spawnAsync('ffmpeg', ['-i', 'path/to/source.flac', '-codec:a', 'libmp3lame', '-b:a', '320k', '-ar', '44100', 'path/to/output.mp3']);
-let childProcess = ffmpeg$.child;
-childProcess.stdout.on('data', (data) => {
-  console.log(`ffmpeg stdout: ${data}`);
-});
-childProcess.stderr.on('data', (data) => {
-  console.error(`ffmpeg stderr: ${data}`);
-});
-let result = await ffmpeg$;
-console.log(`ffmpeg pid ${result.pid} exited with code ${result.code}`);
+(async () => {
+    let ffmpeg$ = spawnAsync('ffmpeg', ['-i', 'path/to/source.flac', '-codec:a', 'libmp3lame', '-b:a', '320k', '-ar', '44100', 'path/to/output.mp3']);
+    let childProcess = ffmpeg$.child;
+    childProcess.stdout.on('data', (data) => {
+      console.log(`ffmpeg stdout: ${data}`);
+    });
+    childProcess.stderr.on('data', (data) => {
+      console.error(`ffmpeg stderr: ${data}`);
+    });
+    let result = await ffmpeg$;
+    console.log(`ffmpeg pid ${result.pid} exited with code ${result.code}`);
+})();
+
 ```
