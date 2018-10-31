@@ -39,3 +39,23 @@ It returns a promise whose result is an object with these properties:
 - `signal`: the signal (ex: `SIGTERM`) used to stop the child process if it did not exit on its own
 
 If there's an error running the child process or it exits with a non-zero status code, `spawnAsync` rejects the returned promise. The Error object also has the properties listed above.
+
+### Accessing the child process
+
+Sometimes you may want to access the child process object--for example, if you wanted to attach event handlers to `stdio` or `stderr` and process data as it is available instead of waiting for the process to be resolved.
+
+You can do this by accessing `.child` on the Promise that is returned by `spawnAsync`.
+
+Here is an example:
+```js
+    let ffmpeg$ = spawnAsync('ffmpeg', ['-i', 'path/to/source.flac', '-codec:a', 'libmp3lame', '-b:a', '320k', '-ar', '44100', 'path/to/output.mp3']);
+    let childProcess = ffmpeg$.child;
+    childProcess.stdout.on('data', (data) => {
+      console.log(`ffmpeg stdout: ${data}`);
+    });
+    childProcess.stderr.on('data', (data) => {
+      console.error(`ffmpeg stderr: ${data}`);
+    });
+    let result = await ffmpeg$;
+    console.log(`ffmpeg pid ${result.pid} exited with code ${result.code}`);
+```
