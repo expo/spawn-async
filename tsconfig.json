@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["es2015"],
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "outDir": "./build",
+    "rootDir": "./src",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}
