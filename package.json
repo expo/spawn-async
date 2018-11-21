@@ -10,7 +10,7 @@
     "node": ">=4"
   },
   "scripts": {
-    "build": "babel -d build --ignore /__tests__/ src",
+    "prepare": "babel -d build --ignore /__tests__/ src",
     "test": "jest src"
   },
   "babel": {
@@ -30,7 +30,7 @@
     "promise",
     "process"
   ],
-  "author": "support@expo.io",
+  "author": "Expo",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/expo/spawn-async/issues"
