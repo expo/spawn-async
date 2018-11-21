@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/expo/spawn-async#readme",
   "dependencies": {
-    "cross-spawn": "^5.1.0"
+    "cross-spawn": "^6.0.5"
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
