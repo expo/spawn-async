@@ -29,12 +29,17 @@ describe('spawnAsync', () => {
     expect(didThrow).toBe(true);
   });
 
-  // NOTE: in a breaking change, signals should probably be treated like non-zero exit codes
-  it(`returns when processes are killed with signals`, async () => {
-    let result = await spawnAsync(path.join(__dirname, 'signal-self.sh'));
-    expect(typeof result.pid).toBe('number');
-    expect(result.status).toBe(null);
-    expect(result.signal).toBe('SIGKILL');
+  it(`returns when processes are killed with signals with non-zero exit codes`, async () => {
+    let didThrow = false;
+    try {
+      await spawnAsync(path.join(__dirname, 'signal-self.sh'));
+    } catch (e) {
+      didThrow = true;
+      expect(typeof e.pid).toBe('number');
+      expect(e.status).toBe(null);
+      expect(e.signal).toBe('SIGKILL');
+    }
+    expect(didThrow).toBe(true);
   });
 
   it(`throws errors when processes don't exist`, async () => {
