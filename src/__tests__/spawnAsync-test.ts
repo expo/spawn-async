@@ -50,4 +50,13 @@ describe('spawnAsync', () => {
     }
     expect(didThrow).toBe(true);
   });
+
+  it(`exposes the child process through a property named "child"`, async () => {
+    let spawnTask = spawnAsync('echo', ['hi']);
+    let childProcess = spawnTask.child;
+    expect(childProcess).toBeDefined();
+
+    let result = await spawnTask;
+    expect(result.pid).toBe(childProcess.pid);
+  });
 });
