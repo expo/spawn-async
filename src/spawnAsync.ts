@@ -38,8 +38,8 @@ export = function spawnAsync(
       });
     }
 
-    child.on('close', (code, signal) => {
-      child.removeAllListeners();
+    let closeListener = (code: number | null, signal: string | null) => {
+      child.removeListener('error', errorListener);
       let result: SpawnResult = {
         pid: child.pid,
         output: [stdout, stderr],
@@ -57,10 +57,10 @@ export = function spawnAsync(
       } else {
         resolve(result);
       }
-    });
+    };
 
-    child.on('error', error => {
-      child.removeAllListeners();
+    let errorListener = (error: Error) => {
+      child.removeListener('close', closeListener);
       Object.assign(error, {
         pid: child.pid,
         output: [stdout, stderr],
@@ -70,7 +70,10 @@ export = function spawnAsync(
         signal: null,
       });
       reject(error);
-    });
+    };
+
+    child.once('close', closeListener);
+    child.once('error', errorListener);
   }) as SpawnPromise<SpawnResult>;
   // @ts-ignore: TypeScript isn't aware the Promise constructor argument runs synchronously and
   // thinks `child` is not yet defined

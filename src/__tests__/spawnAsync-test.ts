@@ -65,6 +65,18 @@ it(`exposes the child process through a property named "child"`, async () => {
 });
 
 it(`runs extra listeners added to the child process`, async () => {
+  let spawnTask = spawnAsync('echo', ['hi']);
+  let mockExitListener = jest.fn();
+  let mockCloseListener = jest.fn();
+  spawnTask.child.on('exit', mockExitListener);
+  spawnTask.child.on('close', mockCloseListener);
+
+  await spawnTask;
+  expect(mockExitListener).toHaveBeenCalledTimes(1);
+  expect(mockCloseListener).toHaveBeenCalledTimes(1);
+});
+
+it(`runs extra error listeners added to the child process when there is an error`, async () => {
   let spawnTask = spawnAsync('nonexistent-program');
   let mockErrorListener = jest.fn();
   spawnTask.child.on('error', mockErrorListener);
