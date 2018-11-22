@@ -1,11 +1,11 @@
 import { ChildProcess, SpawnOptions } from 'child_process';
 import spawn from 'cross-spawn';
 
-interface SpawnPromise<T> extends Promise<T> {
+export interface SpawnPromise<T> extends Promise<T> {
   child: ChildProcess;
 }
 
-interface SpawnResult {
+export interface SpawnResult {
   pid: number;
   output: string[];
   stdout: string;
@@ -14,7 +14,7 @@ interface SpawnResult {
   signal: string | null;
 }
 
-export = function spawnAsync(
+export default function spawnAsync(
   command: string,
   args?: ReadonlyArray<string>,
   options?: SpawnOptions

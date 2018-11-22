@@ -1,6 +1,6 @@
 import path from 'path';
 
-import spawnAsync from '../spawnAsync';
+import spawnAsync, { SpawnPromise, SpawnResult } from '../spawnAsync';
 
 describe('spawnAsync', () => {
   it(`receives output from completed processes`, async () => {
@@ -52,7 +52,8 @@ describe('spawnAsync', () => {
   });
 
   it(`exposes the child process through a property named "child"`, async () => {
-    let spawnTask = spawnAsync('echo', ['hi']);
+    // The type hint isn't necessary but tests that the types are exported and work as expected
+    let spawnTask: SpawnPromise<SpawnResult> = spawnAsync('echo', ['hi']);
     let childProcess = spawnTask.child;
     expect(childProcess).toBeDefined();
 
