@@ -1,5 +1,9 @@
-import { ChildProcess, SpawnOptions } from 'child_process';
+import { ChildProcess, SpawnOptions as NodeSpawnOptions } from 'child_process';
 import spawn from 'cross-spawn';
+
+interface SpawnOptions extends NodeSpawnOptions {
+  ignoreStdio?: boolean;
+}
 
 interface SpawnPromise<T> extends Promise<T> {
   child: ChildProcess;
@@ -17,28 +21,31 @@ interface SpawnResult {
 export = function spawnAsync(
   command: string,
   args?: ReadonlyArray<string>,
-  options?: SpawnOptions
+  options: SpawnOptions = {}
 ): SpawnPromise<SpawnResult> {
   let child: ChildProcess;
   let promise = new Promise((resolve, reject) => {
+    let { ignoreStdio, ...nodeOptions } = options;
     // @ts-ignore: cross-spawn declares "args" to be a regular array instead of a read-only one
-    child = spawn(command, args, options);
+    child = spawn(command, args, nodeOptions);
     let stdout = '';
     let stderr = '';
 
-    if (child.stdout) {
-      child.stdout.on('data', data => {
-        stdout += data;
-      });
+    if (!ignoreStdio) {
+      if (child.stdout) {
+        child.stdout.on('data', data => {
+          stdout += data;
+        });
+      }
+
+      if (child.stderr) {
+        child.stderr.on('data', data => {
+          stderr += data;
+        });
+      }
     }
 
-    if (child.stderr) {
-      child.stderr.on('data', data => {
-        stderr += data;
-      });
-    }
-
-    let closeListener = (code: number | null, signal: string | null) => {
+    let completionListener = (code: number | null, signal: string | null) => {
       child.removeListener('error', errorListener);
       let result: SpawnResult = {
         pid: child.pid,
@@ -60,7 +67,11 @@ export = function spawnAsync(
     };
 
     let errorListener = (error: Error) => {
-      child.removeListener('close', closeListener);
+      if (ignoreStdio) {
+        child.removeListener('exit', completionListener);
+      } else {
+        child.removeListener('close', completionListener);
+      }
       Object.assign(error, {
         pid: child.pid,
         output: [stdout, stderr],
@@ -72,7 +83,11 @@ export = function spawnAsync(
       reject(error);
     };
 
-    child.once('close', closeListener);
+    if (ignoreStdio) {
+      child.once('exit', completionListener);
+    } else {
+      child.once('close', completionListener);
+    }
     child.once('error', errorListener);
   }) as SpawnPromise<SpawnResult>;
   // @ts-ignore: TypeScript isn't aware the Promise constructor argument runs synchronously and

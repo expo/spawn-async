@@ -84,3 +84,39 @@ it(`runs extra error listeners added to the child process when there is an error
   await expect(spawnTask).rejects.toThrowError();
   expect(mockErrorListener).toHaveBeenCalledTimes(1);
 });
+
+it(`returns empty strings when ignoring stdio`, async () => {
+  let result = await spawnAsync('echo', ['hi'], { ignoreStdio: true });
+  expect(typeof result.pid).toBe('number');
+  expect(result.stdout).toBe('');
+  expect(result.stderr).toBe('');
+
+  expect(result.output[0]).toBe(result.stdout);
+  expect(result.output[1]).toBe(result.stderr);
+
+  expect(result.status).toBe(0);
+  expect(result.signal).toBe(null);
+});
+
+it(`returns even if stdout is open when ignoring stdio`, async () => {
+  // Without ignoring stdio, the promise will never resolve as stdout remains open indefinitely
+  let sourceTask = spawnAsync('yes', [], { ignoreStdio: true });
+  expect(sourceTask.child.listenerCount('exit')).toBe(1);
+  expect(sourceTask.child.listenerCount('close')).toBe(0);
+
+  // Create a sink that keeps the source's stdout open even after the source process exits
+  let sinkTask = spawnAsync('cat');
+  sourceTask.child.stdout.pipe(sinkTask.child.stdin);
+  sinkTask.child.stdin.cork();
+
+  // Allow the source's stdout to buffer with a short delay
+  await new Promise(resolve => setTimeout(resolve, 5));
+
+  // The source's stdout stays open even after killing the process
+  sourceTask.child.kill();
+  await expect(sourceTask).rejects.toThrowError();
+
+  // Destroy the sink's stdin stream to let the process exit
+  sinkTask.child.stdin.destroy();
+  await expect(sinkTask).resolves.toMatchObject({ status: 0, stdout: '', stderr: '' });
+});

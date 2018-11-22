@@ -27,7 +27,9 @@ import spawnAsync from '@expo/spawn-async';
 
 ## API
 
-`spawnAsync` takes the same arguments as [`child_process.spawn`](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options).
+`spawnAsync` takes the same arguments as [`child_process.spawn`](https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options). Its options are the same as those of `child_process.spawn` plus:
+
+- `ignoreStdio`: whether to ignore waiting for the child process's stdio streams to close before resolving the result promise. When ignoring stdio, the returned values for `stdout` and `stderr` will be empty strings. The default value of this option is `false`.
 
 It returns a promise whose result is an object with these properties:
 
