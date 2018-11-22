@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es2015"],
+    "target": "es2018",
+    "lib": ["es2018"],
     "module": "commonjs",
     "esModuleInterop": true,
     "sourceMap": true,
