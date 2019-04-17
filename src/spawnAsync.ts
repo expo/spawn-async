@@ -57,8 +57,8 @@ export = function spawnAsync(
       };
       if (code !== 0) {
         let error = signal
-          ? new Error(`Process exited with signal: ${signal}`)
-          : new Error(`Process exited with non-zero code: ${code}`);
+          ? new Error(`${command} exited with signal: ${signal}`)
+          : new Error(`${command} exited with non-zero code: ${code}`);
         Object.assign(error, result);
         reject(error);
       } else {
