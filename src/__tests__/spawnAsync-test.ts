@@ -120,3 +120,13 @@ it(`returns even if stdout is open when ignoring stdio`, async () => {
   sinkTask.child.stdin.destroy();
   await expect(sinkTask).resolves.toMatchObject({ status: 0, stdout: '', stderr: '' });
 });
+
+it('throws errors with preserved stack traces when processes return non-zero exit codes', async () => {
+  expect.assertions(2);
+  try {
+    await spawnAsync('false');
+  } catch (e) {
+    expect(e.stack).toMatch(/\n    \.\.\.\n/);
+    expect(e.stack).toMatch(/at Object\.spawnAsync/);
+  }
+});
