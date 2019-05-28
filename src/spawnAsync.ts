@@ -1,15 +1,15 @@
 import { ChildProcess, SpawnOptions as NodeSpawnOptions } from 'child_process';
 import spawn from 'cross-spawn';
 
-interface SpawnOptions extends NodeSpawnOptions {
+export interface SpawnOptions extends NodeSpawnOptions {
   ignoreStdio?: boolean;
 }
 
-interface SpawnPromise<T> extends Promise<T> {
+export interface SpawnPromise<T> extends Promise<T> {
   child: ChildProcess;
 }
 
-interface SpawnResult {
+export interface SpawnResult {
   pid: number;
   output: string[];
   stdout: string;
@@ -18,7 +18,7 @@ interface SpawnResult {
   signal: string | null;
 }
 
-export = function spawnAsync(
+export default function spawnAsync(
   command: string,
   args?: ReadonlyArray<string>,
   options: SpawnOptions = {}
@@ -64,7 +64,7 @@ export = function spawnAsync(
           ? new Error(`${command} exited with signal: ${signal}`)
           : new Error(`${command} exited with non-zero code: ${code}`);
         if (error.stack && previousStackString) {
-          error.stack += `\n${previousStackString}`
+          error.stack += `\n${previousStackString}`;
         }
         Object.assign(error, result);
         reject(error);
@@ -101,4 +101,4 @@ export = function spawnAsync(
   // thinks `child` is not yet defined
   promise.child = child;
   return promise;
-};
+}
