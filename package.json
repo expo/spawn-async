@@ -3,7 +3,7 @@
   "version": "1.4.2",
   "description": "A Promise-based interface into processes created by child_process.spawn",
   "main": "index.js",
-  "typings": "./build/spawnAsync.d.ts",
+  "types": "./build/spawnAsync.d.ts",
   "files": [
     "build"
   ],
