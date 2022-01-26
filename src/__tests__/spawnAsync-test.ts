@@ -1,3 +1,4 @@
+import assert from 'assert';
 import path from 'path';
 
 import spawnAsync from '../spawnAsync';
@@ -19,7 +20,7 @@ it(`throws errors when processes return non-zero exit codes`, async () => {
   let didThrow = false;
   try {
     await spawnAsync('false');
-  } catch (e) {
+  } catch (e: any) {
     didThrow = true;
     expect(typeof e.pid).toBe('number');
     expect(e.status).toBe(1);
@@ -32,7 +33,7 @@ it(`returns when processes are killed with signals with non-zero exit codes`, as
   let didThrow = false;
   try {
     await spawnAsync(path.join(__dirname, 'signal-self.sh'));
-  } catch (e) {
+  } catch (e: any) {
     didThrow = true;
     expect(typeof e.pid).toBe('number');
     expect(e.status).toBe(null);
@@ -45,7 +46,7 @@ it(`throws errors when processes don't exist`, async () => {
   let didThrow = false;
   try {
     await spawnAsync('nonexistent-program');
-  } catch (e) {
+  } catch (e: any) {
     didThrow = true;
     expect(e.pid).not.toBeDefined();
     expect(e.code).toBe('ENOENT');
@@ -106,11 +107,12 @@ it(`returns even if stdout is open when ignoring stdio`, async () => {
 
   // Create a sink that keeps the source's stdout open even after the source process exits
   let sinkTask = spawnAsync('cat');
+  assert(sourceTask.child.stdout && sinkTask.child.stdin);
   sourceTask.child.stdout.pipe(sinkTask.child.stdin);
   sinkTask.child.stdin.cork();
 
   // Allow the source's stdout to buffer with a short delay
-  await new Promise(resolve => setTimeout(resolve, 5));
+  await new Promise((resolve) => setTimeout(resolve, 5));
 
   // The source's stdout stays open even after killing the process
   sourceTask.child.kill();
@@ -125,8 +127,8 @@ it('throws errors with preserved stack traces when processes return non-zero exi
   expect.assertions(2);
   try {
     await spawnAsync('false');
-  } catch (e) {
+  } catch (e: any) {
     expect(e.stack).toMatch(/\n    \.\.\.\n/);
-    expect(e.stack).toMatch(/at Object\.spawnAsync/);
+    expect(e.stack).toMatch(/at spawnAsync/);
   }
 });
