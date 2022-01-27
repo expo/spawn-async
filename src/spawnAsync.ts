@@ -10,7 +10,7 @@ export interface SpawnPromise<T> extends Promise<T> {
 }
 
 export interface SpawnResult {
-  pid: number;
+  pid?: number;
   output: string[];
   stdout: string;
   stderr: string;
@@ -37,13 +37,13 @@ export default function spawnAsync(
 
     if (!ignoreStdio) {
       if (child.stdout) {
-        child.stdout.on('data', data => {
+        child.stdout.on('data', (data) => {
           stdout += data;
         });
       }
 
       if (child.stderr) {
-        child.stderr.on('data', data => {
+        child.stderr.on('data', (data) => {
           stderr += data;
         });
       }
