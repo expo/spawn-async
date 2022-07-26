@@ -23,9 +23,9 @@ export default function spawnAsync(
   args?: ReadonlyArray<string>,
   options: SpawnOptions = {}
 ): SpawnPromise<SpawnResult> {
-  const fakeErr = new Error('fake error just to preserve stacktrace');
-  const previousStack = fakeErr.stack && fakeErr.stack.split('\n').splice(1);
-  const previousStackString = previousStack && ['    ...', ...previousStack].join('\n');
+  const stubError: { stack?: string } = {};
+  Error.captureStackTrace(stubError);
+  const callerStack = stubError.stack ? stubError.stack.replace(/^.*/, '    ...') : null;
 
   let child: ChildProcess;
   let promise = new Promise((resolve, reject) => {
@@ -63,8 +63,8 @@ export default function spawnAsync(
         let error = signal
           ? new Error(`${command} exited with signal: ${signal}`)
           : new Error(`${command} exited with non-zero code: ${code}`);
-        if (error.stack && previousStackString) {
-          error.stack += `\n${previousStackString}`;
+        if (error.stack && callerStack) {
+          error.stack += `\n${callerStack}`;
         }
         Object.assign(error, result);
         reject(error);
