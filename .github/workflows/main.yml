@@ -1,0 +1,29 @@
+name: Tests
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ['12', '14', '16', '18']
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: yarn install --frozen-lockfile
+    - run: yarn test --coverage
+    - name: Upload coverage report
+      run: |
+        bash <(curl -s https://codecov.io/bash) \
+          -t "${{ secrets.CODECOV_TOKEN }}" \
+          -F node_${{ matrix.node-version }} \
+          -B "${GITHUB_REF//refs\/heads\//}" \
+          -T "${GITHUB_REF//refs\/tags\//}" \
+          -C "$GITHUB_SHA"
