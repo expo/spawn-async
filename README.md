@@ -7,21 +7,21 @@ A cross-platform version of Node's `child_process.spawn` as an async function th
 import spawnAsync from '@expo/spawn-async';
 
 (async function () {
-    let resultPromise = spawnAsync('echo', ['hello', 'world']);
-    let spawnedChildProcess = resultPromise.child;
-    try {
-      let {
-        pid,
-        output: [stdout, stderr],
-        stdout,
-        stderr,
-        status,
-        signal,
-      } = await resultPromise;
-    } catch (e) {
-       console.error(e.stack);
-      // The error object also has the same properties as the result object
-    }
+  let resultPromise = spawnAsync('echo', ['hello', 'world']);
+  let spawnedChildProcess = resultPromise.child;
+  try {
+    let {
+      pid,
+      output: [stdout, stderr],
+      stdout,
+      stderr,
+      status,
+      signal,
+    } = await resultPromise;
+  } catch (e) {
+    console.error(e.stack);
+    // The error object also has the same properties as the result object
+  }
 })();
 ```
 
@@ -51,16 +51,16 @@ You can do this by accessing `.child` on the Promise that is returned by `spawnA
 Here is an example:
 ```js
 (async () => {
-    let ffmpeg$ = spawnAsync('ffmpeg', ['-i', 'path/to/source.flac', '-codec:a', 'libmp3lame', '-b:a', '320k', '-ar', '44100', 'path/to/output.mp3']);
-    let childProcess = ffmpeg$.child;
-    childProcess.stdout.on('data', (data) => {
-      console.log(`ffmpeg stdout: ${data}`);
-    });
-    childProcess.stderr.on('data', (data) => {
-      console.error(`ffmpeg stderr: ${data}`);
-    });
-    let result = await ffmpeg$;
-    console.log(`ffmpeg pid ${result.pid} exited with code ${result.code}`);
+  let ffmpeg$ = spawnAsync('ffmpeg', ['-i', 'path/to/source.flac', '-codec:a', 'libmp3lame', '-b:a', '320k', '-ar', '44100', 'path/to/output.mp3']);
+  let childProcess = ffmpeg$.child;
+  childProcess.stdout.on('data', (data) => {
+    console.log(`ffmpeg stdout: ${data}`);
+  });
+  childProcess.stderr.on('data', (data) => {
+    console.error(`ffmpeg stderr: ${data}`);
+  });
+  let result = await ffmpeg$;
+  console.log(`ffmpeg pid ${result.pid} exited with code ${result.code}`);
 })();
 
 ```
