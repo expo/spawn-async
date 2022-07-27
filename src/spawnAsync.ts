@@ -23,8 +23,7 @@ export default function spawnAsync(
   args?: ReadonlyArray<string>,
   options: SpawnOptions = {}
 ): SpawnPromise<SpawnResult> {
-  const stubError: { stack?: string } = {};
-  Error.captureStackTrace(stubError);
+  const stubError = new Error();
   const callerStack = stubError.stack ? stubError.stack.replace(/^.*/, '    ...') : null;
 
   let child: ChildProcess;
