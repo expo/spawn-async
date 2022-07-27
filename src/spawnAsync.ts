@@ -1,28 +1,30 @@
 import { ChildProcess, SpawnOptions as NodeSpawnOptions } from 'child_process';
 import spawn from 'cross-spawn';
 
-export interface SpawnOptions extends NodeSpawnOptions {
-  ignoreStdio?: boolean;
+namespace spawnAsync {
+  export interface SpawnOptions extends NodeSpawnOptions {
+    ignoreStdio?: boolean;
+  }
+
+  export interface SpawnPromise<T> extends Promise<T> {
+    child: ChildProcess;
+  }
+
+  export interface SpawnResult {
+    pid?: number;
+    output: string[];
+    stdout: string;
+    stderr: string;
+    status: number | null;
+    signal: string | null;
+  }
 }
 
-export interface SpawnPromise<T> extends Promise<T> {
-  child: ChildProcess;
-}
-
-export interface SpawnResult {
-  pid?: number;
-  output: string[];
-  stdout: string;
-  stderr: string;
-  status: number | null;
-  signal: string | null;
-}
-
-export default function spawnAsync(
+function spawnAsync(
   command: string,
   args?: ReadonlyArray<string>,
-  options: SpawnOptions = {}
-): SpawnPromise<SpawnResult> {
+  options: spawnAsync.SpawnOptions = {}
+): spawnAsync.SpawnPromise<spawnAsync.SpawnResult> {
   const stubError = new Error();
   const callerStack = stubError.stack ? stubError.stack.replace(/^.*/, '    ...') : null;
 
@@ -50,7 +52,7 @@ export default function spawnAsync(
 
     let completionListener = (code: number | null, signal: string | null) => {
       child.removeListener('error', errorListener);
-      let result: SpawnResult = {
+      let result: spawnAsync.SpawnResult = {
         pid: child.pid,
         output: [stdout, stderr],
         stdout,
@@ -95,9 +97,11 @@ export default function spawnAsync(
       child.once('close', completionListener);
     }
     child.once('error', errorListener);
-  }) as SpawnPromise<SpawnResult>;
+  }) as spawnAsync.SpawnPromise<spawnAsync.SpawnResult>;
   // @ts-ignore: TypeScript isn't aware the Promise constructor argument runs synchronously and
   // thinks `child` is not yet defined
   promise.child = child;
   return promise;
 }
+
+export = spawnAsync;
