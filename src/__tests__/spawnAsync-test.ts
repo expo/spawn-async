@@ -1,7 +1,7 @@
 import assert from 'assert';
 import path from 'path';
 
-import spawnAsync from '../spawnAsync';
+import spawnAsync, { SpawnOptions, SpawnPromise, SpawnResult } from '../spawnAsync';
 
 it(`receives output from completed processes`, async () => {
   let result = await spawnAsync('echo', ['hi']);
@@ -132,3 +132,10 @@ it('throws errors with preserved stack traces when processes return non-zero exi
     expect(e.stack).toMatch(/at spawnAsync/);
   }
 });
+
+it(`exports TypeScript types`, async () => {
+  let options: SpawnOptions = {};
+  let promise: SpawnPromise<SpawnResult> = spawnAsync('echo', ['hi'], options);
+  let result: SpawnResult = await promise;
+  expect(typeof result.pid).toBe('number');
+})

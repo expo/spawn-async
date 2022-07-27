@@ -2,7 +2,7 @@
   "name": "@expo/spawn-async",
   "version": "1.6.0",
   "description": "A Promise-based interface into processes created by child_process.spawn",
-  "main": "index.js",
+  "main": "./build/spawnAsync.js",
   "types": "./build/spawnAsync.d.ts",
   "files": [
     "build"
