@@ -61,9 +61,10 @@ function spawnAsync(
         signal,
       };
       if (code !== 0) {
+        let args_ = args ? args.join(" ") : "";
         let error = signal
-          ? new Error(`${command} ${args.join(" ")} exited with signal: ${signal}`)
-          : new Error(`${command} ${args.join(" ")} exited with non-zero code: ${code}`);
+          ? new Error(`${command} ${args_} exited with signal: ${signal}`)
+          : new Error(`${command} ${args_} exited with non-zero code: ${code}`);
         if (error.stack && callerStack) {
           error.stack += `\n${callerStack}`;
         }
