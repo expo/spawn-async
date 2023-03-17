@@ -22,11 +22,16 @@ it(`throws errors when processes return non-zero exit codes`, async () => {
     await spawnAsync('false');
   } catch (e: any) {
     didThrow = true;
+    expect(e.message).toBe(`false exited with non-zero code: 1`);
     expect(typeof e.pid).toBe('number');
     expect(e.status).toBe(1);
     expect(e.signal).toBe(null);
   }
   expect(didThrow).toBe(true);
+});
+
+it(`includes command arguments in the error message`, async () => {
+  await expect(() => spawnAsync('false', ['dummy'])).rejects.toThrowError(`false dummy exited`);
 });
 
 it(`returns when processes are killed with signals with non-zero exit codes`, async () => {
@@ -138,4 +143,4 @@ it(`exports TypeScript types`, async () => {
   let promise: SpawnPromise<SpawnResult> = spawnAsync('echo', ['hi'], options);
   let result: SpawnResult = await promise;
   expect(typeof result.pid).toBe('number');
-})
+});
