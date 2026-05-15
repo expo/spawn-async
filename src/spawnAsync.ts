@@ -31,7 +31,6 @@ function spawnAsync(
   let child: ChildProcess;
   let promise = new Promise((resolve, reject) => {
     let { ignoreStdio, ...nodeOptions } = options;
-    // @ts-ignore: cross-spawn declares "args" to be a regular array instead of a read-only one
     child = spawn(command, args, nodeOptions);
     let stdout = '';
     let stderr = '';
@@ -99,6 +98,7 @@ function spawnAsync(
     }
     child.once('error', errorListener);
   }) as spawnAsync.SpawnPromise<spawnAsync.SpawnResult>;
+
   promise.child = child!;
   return promise;
 }
