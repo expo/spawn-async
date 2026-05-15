@@ -151,6 +151,12 @@ function spawnAsync(
       child.stderr?.on('data', makeHandler(stderrChunks));
     }
 
+    // Use 'exit' instead of 'close' when there are no piped stdio streams for us to drain;
+    // 'close' can be deferred past 'exit' when the child has grandchildren that inherit its
+    // stdio fds, so waiting on it without anything to read just stalls
+    const completionEvent =
+      ignoreStdio || (!child.stdout && !child.stderr) ? 'exit' : 'close';
+
     let completionListener = (code: number | null, signal: string | null) => {
       child.removeListener('error', errorListener);
       const argumentString = args && args.length > 0 ? ` ${args.join(' ')}` : '';
@@ -182,7 +188,7 @@ function spawnAsync(
     };
 
     let errorListener = (error: Error) => {
-      child.removeListener(ignoreStdio ? 'exit' : 'close', completionListener);
+      child.removeListener(completionEvent, completionListener);
       const assignResult: Partial<spawnAsync.SpawnResult> = {
         pid: child.pid,
         status: null,
@@ -191,7 +197,7 @@ function spawnAsync(
       reject(attachResult(error, assignResult, stdoutChunks, stderrChunks));
     };
 
-    child.once(ignoreStdio ? 'exit' : 'close', completionListener);
+    child.once(completionEvent, completionListener);
     child.once('error', errorListener);
   }) as spawnAsync.SpawnPromise<spawnAsync.SpawnResult>;
 
