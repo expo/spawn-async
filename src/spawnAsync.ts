@@ -99,9 +99,7 @@ function spawnAsync(
     }
     child.once('error', errorListener);
   }) as spawnAsync.SpawnPromise<spawnAsync.SpawnResult>;
-  // @ts-ignore: TypeScript isn't aware the Promise constructor argument runs synchronously and
-  // thinks `child` is not yet defined
-  promise.child = child;
+  promise.child = child!;
   return promise;
 }
 
