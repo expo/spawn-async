@@ -29,6 +29,8 @@ interface IOChunksState {
   maxExceeded: boolean;
 }
 
+const DEFAULT_MAX_BUFFER = bufferConstants.MAX_STRING_LENGTH;
+
 function spawnAsync(
   command: string,
   args?: ReadonlyArray<string>,
@@ -37,19 +39,24 @@ function spawnAsync(
   const stubError = new Error();
   const callerStack = stubError.stack ? stubError.stack.replace(/^.*/, '    ...') : null;
 
-  let child: ChildProcess;
+  const {
+    ignoreStdio: optionsIgnoreStdio,
+    maxBuffer: optionsMaxBuffer,
+    ...nodeOptions
+  } = options;
+
+  // NOTE(@kitten): When `maxBuffer` is set explicitly, we enforce it strictly
+  // and don't produce a result without it being strictly enforced
+  const enforceMaxBufferStrictly = options.maxBuffer != null;
+
+  const ignoreStdio = !!optionsIgnoreStdio;
+  const maxBuffer = Math.min(
+    optionsMaxBuffer ?? DEFAULT_MAX_BUFFER,
+    bufferConstants.MAX_STRING_LENGTH,
+  );
+
+  let child: ChildProcess = spawn(command, args, nodeOptions);
   let promise = new Promise((resolve, reject) => {
-    let {
-      ignoreStdio,
-      maxBuffer = bufferConstants.MAX_STRING_LENGTH,
-      ...nodeOptions
-    } = options;
-    child = spawn(command, args, nodeOptions);
-
-    // NOTE(@kitten): When `maxBuffer` is set explicitly, we enforce it strictly
-    // and don't produce a result without it being strictly enforced
-    const enforceMaxBufferStrictly = options.maxBuffer != null;
-
     const stdoutChunks: IOChunksState = { buffer: [], maxExceeded: false };
     const stderrChunks: IOChunksState = { buffer: [], maxExceeded: false };
 
@@ -188,7 +195,7 @@ function spawnAsync(
     child.once('error', errorListener);
   }) as spawnAsync.SpawnPromise<spawnAsync.SpawnResult>;
 
-  promise.child = child!;
+  promise.child = child;
   return promise;
 }
 
