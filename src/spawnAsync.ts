@@ -47,7 +47,7 @@ function spawnAsync(
 
   // NOTE(@kitten): When `maxBuffer` is set explicitly, we enforce it strictly
   // and don't produce a result without it being strictly enforced
-  const enforceMaxBufferStrictly = options.maxBuffer != null;
+  const enforceMaxBufferStrictly = optionsMaxBuffer != null;
 
   const ignoreStdio = !!optionsIgnoreStdio;
   const maxBuffer = Math.min(
@@ -69,7 +69,7 @@ function spawnAsync(
           chunks.maxExceeded = true;
           chunk = chunks.buffer[0];
           const chunkLength = typeof chunk === 'string' ? Buffer.byteLength(chunk) : chunk.byteLength;
-          if (length - chunkLength <= maxBuffer) {
+          if (length - chunkLength < maxBuffer) {
             const replacement = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
             const excess = length - maxBuffer;
             chunks.buffer[0] = replacement.subarray(excess);
