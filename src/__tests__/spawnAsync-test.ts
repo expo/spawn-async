@@ -1,7 +1,13 @@
 import assert from 'assert';
+import { constants as bufferConstants } from 'buffer';
 import path from 'path';
 
 import spawnAsync, { SpawnOptions, SpawnPromise, SpawnResult } from '../spawnAsync';
+
+// Captured at file load, before any `jest.doMock('buffer', …)` in later tests
+// can swap the constants out from under us.
+const REAL_MAX_STRING_LENGTH = bufferConstants.MAX_STRING_LENGTH;
+const REAL_MAX_LENGTH = bufferConstants.MAX_LENGTH;
 
 it(`receives output from completed processes`, async () => {
   let result = await spawnAsync('echo', ['hi']);
@@ -238,50 +244,72 @@ it(`listens on 'close' (not 'exit') when stdio is piped`, async () => {
   await task;
 });
 
-describe(`default-cap (lazy) maxBuffer path`, () => {
-  // The lazy path only triggers against MAX_STRING_LENGTH (~512 MiB), which is
-  // impractical to generate. Mock the constant so the same code path activates
-  // at a testable size.
-  function spawnAsyncWithCap(cap: number) {
+describe(`default-cap maxBuffer path`, () => {
+  // The default text cap is MAX_STRING_LENGTH (~512 MiB), which is impractical
+  // to generate. Mock the constant so the same code path activates at a
+  // testable size.
+  function spawnAsyncWithCap(
+    cap: number,
+    encoding?: spawnAsync.SpawnOptions['encoding']
+  ) {
     let task: any;
     jest.isolateModules(() => {
       jest.doMock('buffer', () => {
         const actual = jest.requireActual<typeof import('buffer')>('buffer');
         return {
           ...actual,
-          constants: { ...actual.constants, MAX_STRING_LENGTH: cap },
+          constants: {
+            ...actual.constants,
+            MAX_STRING_LENGTH: cap,
+            MAX_LENGTH: cap,
+          },
         };
       });
       const localSpawnAsync = require('../spawnAsync');
       task = localSpawnAsync(
         process.execPath,
-        ['-e', 'process.stdout.write("a".repeat(100), () => process.stdout.write("b".repeat(50)));']
+        ['-e', 'process.stdout.write("a".repeat(100), () => process.stdout.write("b".repeat(50)));'],
+        encoding ? { encoding } : undefined
       );
     });
-    return task as Promise<SpawnResult> & { child: any };
+    return task;
   }
 
-  it(`resolves the promise without rejecting`, async () => {
-    const result = await spawnAsyncWithCap(100);
-    expect(result.status).toBe(0);
-    expect(result.signal).toBe(null);
+  it(`rejects suggesting the string-length limit when text output exceeds it`, async () => {
+    let caught: any;
+    try {
+      await spawnAsyncWithCap(100);
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeDefined();
+    expect(caught.code).toBe('ERR_CHILD_PROCESS_STDIO_MAXBUFFER');
+    expect(caught.message).toMatch(/the maximum string length \(100 bytes, buffer\.constants\.MAX_STRING_LENGTH\)/);
+    // Suggests the only real remedy: switching to bytes.
+    expect(caught.message).toMatch(/encoding: "buffer"/);
+    // The sliding-window tail is still attached so callers can inspect it.
+    expect(caught.stdout).toBe('a'.repeat(50) + 'b'.repeat(50));
+    expect(caught.stderr).toBe('');
+    expect(caught.status).toBe(0);
   });
 
-  it(`throws ERR_CHILD_PROCESS_STDIO_MAXBUFFER on stdout access with the truncated tail`, async () => {
-    const result = await spawnAsyncWithCap(100);
-    let error: any;
-    try { void result.stdout; } catch (e) { error = e; }
-    expect(error).toMatchObject({
-      code: 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER',
-      stdout: 'a'.repeat(50) + 'b'.repeat(50),
-      stderr: '',
-    });
-  });
-
-  it(`only throws on the overflowed stream; the other reads normally`, async () => {
-    const result = await spawnAsyncWithCap(100);
-    expect(result.stderr).toBe('');
-    expect(() => result.stdout).toThrow();
+  it(`rejects suggesting a larger maxBuffer when bytes output exceeds the default cap`, async () => {
+    let caught: any;
+    try {
+      await spawnAsyncWithCap(100, 'buffer');
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeDefined();
+    expect(caught.code).toBe('ERR_CHILD_PROCESS_STDIO_MAXBUFFER');
+    expect(caught.message).toMatch(/exceeded the default maxBuffer of 100 bytes/);
+    // The default cap in buffer mode is not the runtime ceiling, so the
+    // message points the caller at a larger maxBuffer.
+    expect(caught.message).toMatch(/Pass maxBuffer to capture more output/);
+    expect(caught.message).toMatch(/buffer\.constants\.MAX_LENGTH/);
+    expect(Buffer.from(caught.stdout).toString()).toBe(
+      'a'.repeat(50) + 'b'.repeat(50)
+    );
   });
 });
 
@@ -290,4 +318,142 @@ it(`exports TypeScript types`, async () => {
   let promise: SpawnPromise<SpawnResult> = spawnAsync('echo', ['hi'], options);
   let result: SpawnResult = await promise;
   expect(typeof result.pid).toBe('number');
+});
+
+describe(`encoding: 'buffer'`, () => {
+  it(`returns stdout/stderr as Uint8Array`, async () => {
+    const expected = Buffer.from([0, 1, 2, 0xff, 0x80, 0x7f]);
+    const result = await spawnAsync(
+      process.execPath,
+      [
+        '-e',
+        `process.stdout.write(Buffer.from(${JSON.stringify(Array.from(expected))}));`,
+      ],
+      { encoding: 'buffer' }
+    );
+    expect(result.stdout).toBeInstanceOf(Uint8Array);
+    expect(result.stdout.byteLength).toBe(expected.byteLength);
+    expect(Buffer.from(result.stdout).equals(expected)).toBe(true);
+    expect(result.stderr.byteLength).toBe(0);
+  });
+
+  it(`survives a byte sequence that is not valid UTF-8`, async () => {
+    // The continuation byte 0xC0 followed by 0x00 would be replaced by U+FFFD
+    // when decoded as UTF-8, losing information. With encoding: 'buffer' we get
+    // the exact bytes back.
+    const bytes = Buffer.from([0xc0, 0x00, 0xc1, 0xff]);
+    const result = await spawnAsync(
+      process.execPath,
+      [
+        '-e',
+        `process.stdout.write(Buffer.from(${JSON.stringify(Array.from(bytes))}));`,
+      ],
+      { encoding: 'buffer' }
+    );
+    expect(Buffer.from(result.stdout).equals(bytes)).toBe(true);
+  });
+
+  it(`populates output as [stdout, stderr] of Uint8Array`, async () => {
+    const result = await spawnAsync(
+      process.execPath,
+      ['-e', 'process.stdout.write("ok"); process.stderr.write("warn");'],
+      { encoding: 'buffer' }
+    );
+    expect(result.output).toHaveLength(2);
+    expect(result.output[0]).toBe(result.stdout);
+    expect(result.output[1]).toBe(result.stderr);
+    expect(result.output[0]).toBeInstanceOf(Uint8Array);
+  });
+
+  it(`attaches bytes to the error on non-zero exit, like string stdout`, async () => {
+    const expected = Buffer.from([0x10, 0x20, 0x30]);
+    let caught: any;
+    try {
+      await spawnAsync(
+        process.execPath,
+        [
+          '-e',
+          `process.stdout.write(Buffer.from(${JSON.stringify(Array.from(expected))})); process.exit(7);`,
+        ],
+        { encoding: 'buffer' }
+      );
+    } catch (e) {
+      caught = e;
+    }
+    expect(caught).toBeDefined();
+    expect(caught.status).toBe(7);
+    expect(Buffer.from(caught.stdout).equals(expected)).toBe(true);
+  });
+
+  it(`enforces maxBuffer with encoding: 'buffer'`, async () => {
+    await expect(
+      spawnAsync(
+        process.execPath,
+        ['-e', 'process.stdout.write(Buffer.alloc(1000, 0xab));'],
+        { encoding: 'buffer', maxBuffer: 100 }
+      )
+    ).rejects.toMatchObject({
+      code: 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER',
+    });
+  });
+});
+
+describe(`encoding: text encodings other than utf8`, () => {
+  it(`decodes stdout with the requested encoding`, async () => {
+    // Latin-1 maps 0x00–0xff one-to-one to U+0000–U+00FF. Bytes that would be
+    // multibyte continuations in UTF-8 (e.g. 0xC0, 0xFF) decode cleanly here.
+    const bytes = Buffer.from([0xc0, 0xc1, 0xff]);
+    const result = await spawnAsync(
+      process.execPath,
+      [
+        '-e',
+        `process.stdout.write(Buffer.from(${JSON.stringify(Array.from(bytes))}));`,
+      ],
+      { encoding: 'latin1' }
+    );
+    expect(result.stdout).toBe(bytes.toString('latin1'));
+    expect(result.stdout).toBe('ÀÁÿ');
+  });
+
+  it(`decodes stdout with hex encoding`, async () => {
+    const result = await spawnAsync(
+      process.execPath,
+      ['-e', 'process.stdout.write(Buffer.from([0xde, 0xad, 0xbe, 0xef]));'],
+      { encoding: 'hex' }
+    );
+    expect(result.stdout).toBe('deadbeef');
+  });
+});
+
+describe(`maxBuffer validation`, () => {
+  it(`throws TypeError synchronously when maxBuffer exceeds MAX_STRING_LENGTH in text mode`, () => {
+    expect(() =>
+      spawnAsync('echo', ['hi'], { maxBuffer: REAL_MAX_STRING_LENGTH + 1 })
+    ).toThrow(TypeError);
+    expect(() =>
+      spawnAsync('echo', ['hi'], { maxBuffer: REAL_MAX_STRING_LENGTH + 1 })
+    ).toThrow(/exceeds the maximum string length/);
+  });
+
+  it(`throws TypeError synchronously when maxBuffer exceeds MAX_LENGTH in buffer mode`, () => {
+    if (REAL_MAX_LENGTH >= Number.MAX_SAFE_INTEGER) {
+      // On runtimes where MAX_LENGTH already equals MAX_SAFE_INTEGER there's
+      // no representable integer Number larger than it, so this case is
+      // unreachable. Recent Node sets MAX_LENGTH this high.
+      return;
+    }
+    expect(() =>
+      spawnAsync('echo', ['hi'], {
+        encoding: 'buffer',
+        maxBuffer: REAL_MAX_LENGTH + 1,
+      })
+    ).toThrow(/exceeds the maximum byte array length/);
+  });
+
+  it(`accepts maxBuffer exactly equal to MAX_STRING_LENGTH`, async () => {
+    const result = await spawnAsync('echo', ['hi'], {
+      maxBuffer: REAL_MAX_STRING_LENGTH,
+    });
+    expect(result.stdout).toBe('hi\n');
+  });
 });
