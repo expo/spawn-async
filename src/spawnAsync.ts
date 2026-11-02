@@ -1,6 +1,6 @@
 import { ChildProcess, SpawnOptions as NodeSpawnOptions } from 'child_process';
 import { constants as bufferConstants } from 'buffer';
-import spawn from 'cross-spawn';
+import spawn from 'tiny-cross-spawn';
 
 namespace spawnAsync {
   export interface SpawnOptions extends NodeSpawnOptions {
